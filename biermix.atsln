@@ -1,0 +1,20 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Atmel Studio Solution File, Format Version 11.00
+Project("{54F91283-7BC4-4236-8FF9-10F437C3AD48}") = "biermix", "biermix\biermix.cproj", "{086980EC-171B-4C95-B6D0-8CBC4A8B8DA5}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|AVR = Debug|AVR
+		Release|AVR = Release|AVR
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{086980EC-171B-4C95-B6D0-8CBC4A8B8DA5}.Debug|AVR.ActiveCfg = Debug|AVR
+		{086980EC-171B-4C95-B6D0-8CBC4A8B8DA5}.Debug|AVR.Build.0 = Debug|AVR
+		{086980EC-171B-4C95-B6D0-8CBC4A8B8DA5}.Release|AVR.ActiveCfg = Release|AVR
+		{086980EC-171B-4C95-B6D0-8CBC4A8B8DA5}.Release|AVR.Build.0 = Release|AVR
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
