@@ -96,14 +96,15 @@ int main(void){
 	DDRB |= (1<<DDB3);
 	DDRB |= (1<<DDB4);
 
-	TCCR2 &= ((1<<FOC2) | (1<<WGM21) | (1<<COM20));
-	TCCR2 |= ((1<<WGM20) | (1<<COM21) | (1<<CS22) | (1<<CS21) | (1<<CS20));
+	//Prescaling auf 0
+	TCCR2 &= ((1<<FOC2) | (1<<WGM21) | (1<<COM20) | (1<<CS22) | (1<<CS21));
+	TCCR2 |= ((1<<WGM20) | (1<<COM21) |  (1<<CS20));
 
 	//OCR2 = 0;
 	
 	
 
-	int ocr_set = 0;
+	int ocr_set = 255;
 	encode_init();
 	sei();
 	
@@ -113,7 +114,7 @@ int main(void){
 	
 	uint16_t help = 0;
 	char str[16];
-	int help_i = 0;
+	uint8_t help_i = 0;
 	int offset = 0;
 	
 	while(1){
@@ -121,7 +122,7 @@ int main(void){
 		//Kontrolle gegen den Überlauf. 
 		offset = encode_read4();
 		if( !(ocr_set == 0 && offset < 0) || !(ocr_set == 255 && offset > 0) ){
-			ocr_set += offset;
+			ocr_set -= offset;
 			OCR2 = ocr_set;	
 		}
 		
@@ -129,6 +130,7 @@ int main(void){
 		if(help == 655){
 			lcd_gotoxy(0,1);
 			help_i = OCR2;
+			help_i = 255 - help_i;
 			itoa(help_i, str, 10);
 			lcd_puts(str);
 			help = 0;

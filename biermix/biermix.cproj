@@ -21,9 +21,8 @@
     <OverrideVtorValue />
     <eraseonlaunchrule>0</eraseonlaunchrule>
     <AsfVersion>2.11.1</AsfVersion>
-    <avrtoolinterface>
-    </avrtoolinterface>
-    <avrtool>com.atmel.avrdbg.tool.simulator</avrtool>
+    <avrtoolinterface>ISP</avrtoolinterface>
+    <avrtool>com.atmel.avrdbg.tool.ispmk2</avrtool>
     <com_atmel_avrdbg_tool_simulator>
       <ToolType>com.atmel.avrdbg.tool.simulator</ToolType>
       <ToolName>AVR Simulator</ToolName>
