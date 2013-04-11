@@ -114,12 +114,20 @@ int main(void){
 	uint16_t help = 0;
 	char str[16];
 	int help_i = 0;
+	int offset = 0;
 	
 	while(1){
-		ocr_set += encode_read4();
-		OCR2 = ocr_set;
+		
+		//Kontrolle gegen den Überlauf. 
+		offset = encode_read4();
+		if( !(ocr_set == 0 && offset < 0) || !(ocr_set == 255 && offset > 0) ){
+			ocr_set += offset;
+			OCR2 = ocr_set;	
+		}
+		
+		//TODO: leg das auf nen Timer Call
 		if(help == 655){
-			lcd_clrscr();
+			lcd_gotoxy(0,1);
 			help_i = OCR2;
 			itoa(help_i, str, 10);
 			lcd_puts(str);
