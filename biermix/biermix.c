@@ -119,15 +119,15 @@ int main(void){
 	
 	while(1){
 		
-		//Kontrolle gegen den Überlauf. 
 		offset = encode_read4();
-		if( !(ocr_set == 0 && offset < 0) || !(ocr_set == 255 && offset > 0) ){
-			ocr_set -= offset;
-			OCR2 = ocr_set;	
-		}
+		ocr_set -= offset;
+		OCR2 = ocr_set;	
+
+		
 		
 		//TODO: leg das auf nen Timer Call
 		if(help == 655){
+			//lcd_clrscr(); //Auskommentiert um einen Debug-Punkt für Reset zu bekommen
 			lcd_gotoxy(0,1);
 			help_i = OCR2;
 			help_i = 255 - help_i;
