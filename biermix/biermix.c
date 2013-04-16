@@ -109,7 +109,7 @@ int main(void){
 	sei();
 	
 	lcd_init(LCD_DISP_ON_CURSOR_BLINK);
-	lcd_puts("Foo");
+	lcd_puts("Here for beer");
 	
 	
 	uint16_t help = 0;
