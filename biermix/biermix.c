@@ -1,6 +1,5 @@
 /**
  * Atmega Steuerung für Bierdreher
- * Umzug
  */
 #include <avr/io.h>
 #include <avr/interrupt.h>
@@ -13,16 +12,25 @@
 #define XTAL 4000000
 
 //KTY-Offset
-#define OFFSET 140
+#define OFFSET 116
 
 #include "lcd.h"
+
+/************************************************************************/
+/* Globals                                                              */
+/************************************************************************/
+
 //importierter Drehimpulscode
 volatile int8_t enc_delta;          // -128 ... 127
 static int8_t last;
 
 //ADC
 volatile uint16_t adc_val;
-	
+
+/************************************************************************/
+/* Subroutines                                                          */
+/************************************************************************/
+
 void encode_init( void )
 {
 	int8_t new;
@@ -34,13 +42,23 @@ void encode_init( void )
 		new ^= 1;                   // convert gray to binary
 	last = new;                   // power on state
 	enc_delta = 0;
-	
-	//Timer, mit Interrupt ca. jede 1000/s
-	TCCR0 |= ((1<<CS01));
-	TIMSK |= (1<<TOIE0);
 }
+
+int8_t encode_read4( void )         // read four step encoders
+{
+	int8_t val;
 	
-	
+	cli();
+	val = enc_delta;
+	enc_delta = val & 3;
+	sei();
+	return val >> 2;
+}	
+
+/************************************************************************/
+/* Interrupts                                                           */
+/************************************************************************/
+
 ISR( TIMER0_OVF_vect )             // 1ms for manual movement
 {
 	int8_t new, diff;
@@ -61,54 +79,47 @@ ISR( ADC_vect ){
 	ADCSRA |= (1<<ADSC);
 }
 
-int8_t encode_read1( void )         // read single step encoders
-{
-	int8_t val;
-	
-	cli();
-	val = enc_delta;
-	enc_delta = 0;
-	sei();
-	return val;                   // counts since last call
-}
 
-int8_t encode_read4( void )         // read four step encoders
-{
-	int8_t val;
-	
-	cli();
-	val = enc_delta;
-	enc_delta = val & 3;
-	sei();
-	return val >> 2;
-}
+/************************************************************************/
+/* Main                                                                 */
+/************************************************************************/
 
 int main(void){
 
-	//PB3/4 für Drehgeber
-	DDRB |= (1<<DDB3);
-	DDRB |= (1<<DDB4);
 
-	//PWM Init
+
+	/************************************************************************/
+	/* Init PWM                                                             */
+	/************************************************************************/
+	
 	//Prescaling auf 0
 	TCCR2 &= ~((1<<FOC2) | (1<<WGM21) | (1<<COM20) | (1<<CS22) | (1<<CS21));
 	TCCR2 |= ((1<<WGM20) | (1<<COM21) |  (1<<CS20));
 
+
+	/************************************************************************/
+	/* Init rotary pulse encoder                                            */
+	/************************************************************************/
+	
+	DDRB |= (1<<DDB3);
+	DDRB |= (1<<DDB4);
+	
+	//Timer0, mit Interrupt ca. jede 1000/s
+	TCCR0 |= ((1<<CS01));
+	TIMSK |= (1<<TOIE0);
 	int ocr_set = 255;
 	encode_init();
-	sei();
 	
-	//LCD_init
+	/************************************************************************/
+	/* LCD Initialization                                                   */
+	/************************************************************************/
+	
 	lcd_init(LCD_DISP_ON_CURSOR_BLINK);
 	lcd_puts("Here for beer");
 	
 	/************************************************************************/
-	/*    ADC_init                                                          */
+	/* ADC_init                                                             */
 	/************************************************************************/
-	
-//	//Referenezspannung auf Vcc
-//	ADMUX &= ~(1<<REFS0);
-//	ADMUX |= (1<<REFS1);
 	
 	//Referenzspannung auf 2,56V
 	ADMUX |= ((1<<REFS1)|(1<<REFS0));
@@ -124,15 +135,24 @@ int main(void){
 	//ADC-Mode auf SingleConversion und Interrupt aktivieren
 	ADCSRA |= ((1<<ADEN) | (1<<ADIE) | (1<<ADSC));
 	
+	/************************************************************************/
+	/* Init help variables                                                  */
+	/************************************************************************/
+	
 	uint16_t help = 0;
 	char str[10];
 	//uint16_t help_i = 0;
 	int offset = 0;
 
-	double temp = 2.34;
+	double temp;
 	
+	/************************************************************************/
+	/* Start                                                                */
+	/************************************************************************/
+	sei();
 	while(1){
 		
+		//Read gray-code and set PWM
 		offset = encode_read4();
 		ocr_set -= offset;
 		OCR2 = ocr_set;	
@@ -143,24 +163,16 @@ int main(void){
 		temp = ((double)adc_val * (2.5/7.7125)) - (double)OFFSET;
 		//dtostrf(temp, 4, 0, str);
 		sprintf(str, "%3.0f", temp);
+		//sprintf(str, "%3d", adc_val);
 		lcd_puts(strcat(str, "C / "));
 		//itoa(255-OCR2, str, 10);
 		sprintf(str, "%3d", 255-OCR2);
 		lcd_puts(str);
+		//lcd_gotoxy(1,5);
 		help = 0;
 	}					
-		
-// 		//TODO: leg das auf nen Timer Call
-// 		if(help == 655){
-// 			//lcd_clrscr(); //Auskommentiert um einen Debug-Punkt für Reset zu bekommen
-// 			lcd_gotoxy(0,1);
-// 			help_i = OCR2;
-// 			help_i = 255 - help_i;
-// 			itoa(help_i, str, 10);
-// 			lcd_puts(str);
-// 			help = 0;
-// 		}
-		help++;
+	help++;
+	
 	}
 
 }
